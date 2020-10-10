@@ -27,8 +27,7 @@ class EmailSender(object):
         message['Subject'] = subject 
         message['From'] = self.mail_sender 
         for receiver in self.receivers:            
-            message['To'] = receiver  
-                       
+            message['To'] = receiver                         
             #登录并发送邮件
             try:
                 smtpObj = smtplib.SMTP()                 
@@ -37,6 +36,8 @@ class EmailSender(object):
                 smtpObj.sendmail(
                     self.mail_sender, self.receivers, message.as_string())             
                 smtpObj.quit() 
+
                 print(f'send info for {receiver}successfully😁😁')
+                print('send info successfully')
             except smtplib.SMTPException as e:
                 print('error',e) #打印错误

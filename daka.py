@@ -193,8 +193,6 @@ if __name__=="__main__":
         print("⏲  请输入定时时间（默认每天6:05）")
         hour = input("\thour: ") or 6
         minute = input("\tminute: ") or 5
-
-
     # test unit    
     if sys.argv[1] == "test":
         main(username, password, sender)
