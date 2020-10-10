@@ -5,6 +5,7 @@ import getpass
 from halo import Halo
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+from sender import EmailSender
 class DaKa(object):
     """Hit card class
 
@@ -99,6 +100,7 @@ class DaKa(object):
         return hex(result_int)[2:].rjust(128, '0')
 
 
+
 # Exceptions 
 class LoginError(Exception):
     """Login Exception"""
@@ -113,7 +115,7 @@ class DecodeError(Exception):
     pass
 
 
-def main(username, password):
+def main(username, password, sender=None):
     """Hit card process
 
     Arguments:
@@ -140,7 +142,10 @@ def main(username, password):
         dk.get_info()
         spinner.succeed('%s %s同学, 你好~' %(dk.info['number'], dk.info['name']))
     except Exception as err:
-        spinner.fail('获取信息失败，请手动打卡，更多信息: ' + str(err))
+        err_info = '获取信息失败，请手动打卡，更多信息: ' + str(err)
+        spinner.fail(err_info)
+        if sender != None:
+            sender.sendMessage(err_info, "打卡失败")
         return
 
     spinner.start(text='正在为您打卡打卡打卡')
@@ -151,7 +156,10 @@ def main(username, password):
         else:
             spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text=res['m'])
     except:
-        spinner.fail('数据提交失败')
+        err_info = "数据提交失败"
+        spinner.fail(err_info)
+        if sender != None:
+            sender.sendMessage(err_info, err_info) 
         return 
 
 
@@ -162,6 +170,21 @@ if __name__=="__main__":
         password = configs["password"]
         hour = configs["schedule"]["hour"]
         minute = configs["schedule"]["minute"]
+
+        set_sender = configs["set_sender"]
+        set_host = configs["set_host"]
+        sender = None
+        if(set_sender):
+            mail_user = configs["mail_user"]
+            mail_pass = configs["mail_pass"]
+            mail_receivers = configs["mail_receiver"]
+            #TODO bug list of receivers.
+            if(set_host):
+                mail_host = configs["mail_host"]            
+                sender = EmailSender(mail_user, mail_pass, mail_receivers, mail_host)
+            else:
+                sender = EmailSender(mail_user, mail_pass, mail_receivers)
+        
     else:
         username = input("👤 浙大统一认证用户名: ")
         password = getpass.getpass('🔑 浙大统一认证密码: ')
@@ -169,9 +192,11 @@ if __name__=="__main__":
         hour = input("\thour: ") or 6
         minute = input("\tminute: ") or 5
 
+
+    
     # Schedule task
     scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'cron', args=[username, password], hour=hour, minute=minute)
+    scheduler.add_job(main, 'cron', args=[username, password, sender], hour=hour, minute=minute)
     print('⏰ 已启动定时程序，每天 %02d:%02d 为您打卡' %(int(hour), int(minute)))
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
