@@ -194,7 +194,7 @@ if __name__=="__main__":
         hour = input("\thour: ") or 6
         minute = input("\tminute: ") or 5
     # test unit    
-    if sys.argv[1] == "test":
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         main(username, password, sender)
 
     # Schedule task
