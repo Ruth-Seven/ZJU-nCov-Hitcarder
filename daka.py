@@ -1,10 +1,12 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import requests, json, re
 import time, datetime, os, sys
 import getpass
 from halo import Halo
-from apscheduler.schedulers.blocking import BlockingScheduler
 
+from apscheduler.schedulers.blocking import BlockingScheduler
+from config import Config, configCollection
 from sender import EmailSender
 class DaKa(object):
     """Hit card class
@@ -166,41 +168,30 @@ def main(username, password, sender=None):
 
 
 if __name__=="__main__":
-    if os.path.exists('./config.json'):
-        configs = json.loads(open('./config.json', 'r').read())
-        username = configs["username"]
-        password = configs["password"]
-        hour = configs["schedule"]["hour"]
-        minute = configs["schedule"]["minute"]
-
-        set_sender = configs["set_sender"]
-        set_host = configs["set_host"]
-        sender = None
-        if(set_sender):
-            mail_user = configs["mail_user"]
-            mail_pass = configs["mail_pass"]
-            mail_receivers = configs["mail_receiver"]
-            #TODO bug list of receivers.
-            if(set_host):
-                mail_host = configs["mail_host"]            
-                sender = EmailSender(mail_user, mail_pass, mail_receivers, mail_host)
-            else:
-                sender = EmailSender(mail_user, mail_pass, mail_receivers)
-        
+    configfile = './config.json'
+    if os.path.exists(configfile):
+        configs = configCollection(configfile).getconfigs()        
     else:
         username = input("👤 浙大统一认证用户名: ")
         password = getpass.getpass('🔑 浙大统一认证密码: ')
         print("⏲  请输入定时时间（默认每天6:05）")
         hour = input("\thour: ") or 6
         minute = input("\tminute: ") or 5
+        config = Config()
+        config.changeItem(username, password, hour, minute)
+        configs = [].append(config)
+        
     # test unit    
     if len(sys.argv) > 1 and sys.argv[1] == "test":
-        main(username, password, sender)
+        main(configs[0].username, configs[0].password, configs[0].sender)
 
     # Schedule task
     scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'cron', args=[username, password, sender], hour=hour, minute=minute)
-    print('⏰ 已启动定时程序，每天 %02d:%02d 为您打卡' %(int(hour), int(minute)))
+
+    for config in configs:        
+        scheduler.add_job(main, 'cron', args=[config.username, config.password, config.sender], hour=config.hour, minute=config.minute)        
+        print('⏰ 已启动定时程序，每天 %02d:%02d 为%s打卡' %(int(config.hour), int(config.minute), config.username))
+    
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
     try:

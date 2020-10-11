@@ -1,0 +1,37 @@
+{
+
+    "1": {
+        "username": "你的浙大统一认证平台用户名",
+        "password": "你的浙大统一认证平台密码",
+        "schedule": {
+            "hour": "16",
+            "minute": "05"
+        },
+
+        "set_sender": false,
+        "set_host": false,
+        "mail_user": "发送邮件号",
+        "mail_host": "发送邮件SMTP HOST",
+        "mail_pass": "邮箱密码或者认证码",
+        "mail_receiver": ["接收邮箱"]
+    },
+
+    "2": {
+        "username": "你的浙大统一认证平台用户名",
+        "password": "你的浙大统一认证平台密码",
+        "schedule": {
+            "hour": "16",
+            "minute": "10"
+        },
+
+        "set_sender": false,
+        "set_host": false,
+        "mail_user": "发送邮件号",
+        "mail_host": "发送邮件SMTP HOST",
+        "mail_pass": "邮箱密码或者认证码",
+        "mail_receiver": ["接收邮箱"]
+    }
+    
+
+
+}
